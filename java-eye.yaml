@@ -10,7 +10,7 @@ spec:
   selector:
     matchLabels:
       app: java-server
-  replicas: 3
+  replicas: 30
   template:
     metadata:
       labels:
