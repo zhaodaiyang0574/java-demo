@@ -53,7 +53,7 @@ spec:
             startupProbe:
               tcpSocket:
                 port: 8080
-              failureThreshold: 30
+              failureThreshold: 15
               periodSeconds: 10
             readinessProbe:
               tcpSocket:
