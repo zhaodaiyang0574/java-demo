@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: java-server
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/path: '/metrics'
+    prometheus.io/port: '80'
+spec:
+  selector:
+    matchLabels:
+      app: java-server
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: java-eye
+      spec:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - web-server
+                topologyKey: "kubernetes.io/hostname"
+          podAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - java-eye
+                topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: java-eye
+          image: registry.k8s.io/java/java-eye:latest
+          resources:
+            limits:
+              memory: 4Gi
+              cpu: 2
+            requests:
+              memory: 2Gi
+              cpu: 1
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - mountPath: /data/jar/logs
+              name: java-logs-volume
+      volumes:
+        - name: java-logs-volume
+          emptydir: {}
+
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            failureThreshold: 30
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+
+          lifecycle:
+            preStop:
+              exec:
+                # SIGTERM triggers a quick exit; gracefully terminate instead
+                command: ["/bin/bash", "-c", "PID=`pidof java` && kill -SIGTERM $PID && while ps -p $PID > /dev/null; do sleep 1; done;"]
+
+
