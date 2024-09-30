@@ -9,7 +9,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: java-server
+      app: java-eye
   replicas: 30
   template:
     metadata:
