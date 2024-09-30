@@ -35,45 +35,45 @@ spec:
                       values:
                         - java-eye
                 topologyKey: "kubernetes.io/hostname"
-      containers:
-        - name: java-eye
-          image: registry.k8s.io/java/java-eye:latest
-          resources:
-            limits:
-              memory: 4Gi
-              cpu: 2
-            requests:
-              memory: 2Gi
-              cpu: 1
-          ports:
-            - containerPort: 8080
-          volumeMounts:
-            - mountPath: /data/jar/logs
-              name: java-logs-volume
-      volumes:
-        - name: java-logs-volume
-          emptydir: {}
-
-          startupProbe:
-            tcpSocket:
-              port: 8080
-            failureThreshold: 30
-            periodSeconds: 10
-          readinessProbe:
-            tcpSocket:
-              port: 8080
-            initialDelaySeconds: 15
-            periodSeconds: 10
-          livenessProbe:
-            tcpSocket:
-              port: 8080
-            initialDelaySeconds: 15
-            periodSeconds: 10
-
-          lifecycle:
-            preStop:
-              exec:
-                # SIGTERM triggers a quick exit; gracefully terminate instead
-                command: ["/bin/bash", "-c", "PID=`pidof java` && kill -SIGTERM $PID && while ps -p $PID > /dev/null; do sleep 1; done;"]
-
-
+        containers:
+          - name: java-eye
+            image: registry.k8s.io/java/java-eye:latest
+            resources:
+              limits:
+                memory: 4Gi
+                cpu: 2
+              requests:
+                memory: 2Gi
+                cpu: 1
+            ports:
+              - containerPort: 8080
+            volumeMounts:
+              - mountPath: /data/jar/logs
+                name: java-logs-volume
+        volumes:
+          - name: java-logs-volume
+            emptydir: {}
+  
+            startupProbe:
+              tcpSocket:
+                port: 8080
+              failureThreshold: 30
+              periodSeconds: 10
+            readinessProbe:
+              tcpSocket:
+                port: 8080
+              initialDelaySeconds: 15
+              periodSeconds: 10
+            livenessProbe:
+              tcpSocket:
+                port: 8080
+              initialDelaySeconds: 15
+              periodSeconds: 10
+  
+            lifecycle:
+              preStop:
+                exec:
+                  # SIGTERM triggers a quick exit; gracefully terminate instead
+                  command: ["/bin/bash", "-c", "PID=`pidof java` && kill -SIGTERM $PID && while ps -p $PID > /dev/null; do sleep 1; done;"]
+  
+  
